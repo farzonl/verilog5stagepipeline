@@ -1,7 +1,7 @@
 module FE(CLOCK_50,reset,next_instr_addr,fe_instr_addr,id_instr_addr,next_pc_in,fetch_instr,id_instr,PC_WR_EN,FE_LATCH_WR,instr_mem_en,ctr_sig);
-input CLOCK_50,reset;
-input  [15:0] next_instr_addr, fe_instr_addr, next_pc_in, fetch_instr;
-output [15:0] id_instr_addr,id_instr;
+input CLOCK_50,reset, next_pc_in;
+output  [15:0] next_instr_addr, fe_instr_addr, fetch_instr;
+output  [15:0] id_instr_addr,id_instr;
 input PC_WR_EN, FE_LATCH_WR, instr_mem_en;
 input [1:0] ctr_sig;
 //currently  everything is the same 
