@@ -1,13 +1,13 @@
-module ID(CLK,IR,OP_EX,OP_MEM,DR_EX,DR_MEM,STALL,DR,OPERAND1,OPERAND2,SR1,SR2,ALUOP,AGEX_RESULT,MEM_RESULT,DR_WB,WB_RESULT,WB_ENABLE,PC_Offset,Mem_Offset,CC);
+module ID(CLK,IR,OP_EX,OP_MEM,DR_EX,DR_MEM,STALL,DR,OPERAND1,OPERAND2,/*SR1,SR2,*/ALUOP,AGEX_RESULT,MEM_RESULT,DR_WB,WB_RESULT,WB_ENABLE,PC_Offset,Mem_Offset,CC,BRANCH,PC_IN,PC_OUT);
 
 input CLK,WB_ENABLE;
-input[15:0] IR,AGEX_RESULT,MEM_RESULT,WB_RESULT;
+input[15:0] IR,AGEX_RESULT,MEM_RESULT,WB_RESULT,PC_IN;
 input[1:0] OP_EX,OP_MEM;
 input[2:0] DR_EX,DR_MEM,DR_WB,CC;
 
-output STALL;
-output[15:0] OPERAND1,OPERAND2;
-output[2:0] DR,SR1,SR2;
+output STALL,BRANCH;
+output[15:0] OPERAND1,OPERAND2,PC_OUT;
+output[2:0] DR;//,SR1,SR2;
 output[1:0] ALUOP;
 output[15:0] PC_Offset;
 output[15:0] Mem_Offset;
@@ -49,12 +49,13 @@ assign ALU_operation =
 	2'bxx;
 
 //CC[2] = N, CC[1] == Z, CC[0] == P
-assign STALL = (ALU_operation == 2'b00 && ((IR[11] && CC[2]) || (IR[10] && CC[1]) || (IR[9] && CC[0]))) ? 1'b1 : 1'b0;
+assign STALL = ((ALU_operation == 2'b00 && ((IR[11] && CC[2]) || (IR[10] && CC[1]) || (IR[9] && CC[0]))) || (OP_EX==2'b10 && (DR_EX == SR1_decoded || DR_EX == SR2_decoded))) ? 1'b1 : 1'b0;
+assign BRANCH = (ALU_operation == 2'b00 && ((IR[11] && CC[2]) || (IR[10] && CC[1]) || (IR[9] && CC[0]))) ? 1'b1 : 1'b0;
 assign DR = IR[11:9];
-assign SR1 = SR1_decoded;
-assign SR2 = SR2_decoded;
+//assign SR1 = SR1_decoded;
+//assign SR2 = SR2_decoded;
 assign ALUOP = ALU_operation;
-	
+assign PC_OUT = PC_IN;
 endmodule
 
 module sign_extend(IN,OUT);
