@@ -1,29 +1,18 @@
-module WB(CLOCK_50, wb_ctr_sig, wb_mem_src, wb_alu_src, WB_val); 
-input CLOCK_50;
-input  [0 :0] wb_ctr_sig;
-input  [15:0] wb_mem_src,wb_alu_src;
+module WB(OP, DR, wb_data, WB_val, WB_EN, HEX0,HEX1,HEX2,HEX3); 
+input [1:0] OP;
+input	 [2:0] DR;
+input  [15:0] wb_data;
 output [15:0] WB_val;
-wb_mux (CLOCK_50,wb_ctr_sig, wb_alu_src,wb_mem_src,WB_val);
+output WB_EN;
+output [6:0] HEX0, HEX1, HEX2, HEX3;
+
+assign WB_val = wb_data;
+assign WB_EN = (OP[0]) ? 1'b1 : 1'b0;
+
 SevenSeg sseg0(.IN(WB_val[ 3: 0]),.OUT(HEX0));
 SevenSeg sseg1(.IN(WB_val[ 7: 4]),.OUT(HEX1));
 SevenSeg sseg2(.IN(WB_val[11: 8]),.OUT(HEX2));
 SevenSeg sseg3(.IN(WB_val[15:12]),.OUT(HEX3));
-endmodule
-
-module wb_mux(clock,ctr_sig,in_1,in_2,out);
-   input clock;
-	input [0:0] ctr_sig;
-	input [15:0] in_1,in_2;
-	
-	output reg [15:0] out;
-	
-	always@(posedge clock) begin
-		if(ctr_sig == 'd1)
-			out <= in_1;
-		else if(ctr_sig == 'd0)
-			out <= in_2;
-	end
-
 endmodule
 
 module SevenSeg(OUT,IN);
