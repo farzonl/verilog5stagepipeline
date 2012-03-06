@@ -1,38 +1,38 @@
-module processor (CLOCK_50, KEY);
+module processor (CLOCK_50, KEY, HEX0,HEX1,HEX2,HEX3);
 input CLOCK_50;
 input [0:0] KEY;
-wire [15:0] next_instr_addr, fe_instr_addr, id_instr_addr;
-wire [15:0] next_pc_in     , fetch_instr  , id_instr;
+output [6:0] HEX0,HEX1,HEX2,HEX3;
+
+wire [15:0] next_instr_addr, fe_instr_addr, id_instr_addr,branch_addr;
+wire [15:0] fetch_instr  , id_instr;
 wire PC_WR_EN, FE_LATCH_WR, instr_mem_en;
-wire [1:0] ctr_sig; 
 wire [0:0] wb_ctr_sig;
 wire reset  =!KEY[0];
+wire BRANCH_to_EX,BRANCH_from_EX,STALL;
 /*reg [15:0] PC;
 initial PC <= 16;*/
 
+wire [15:0] OPERAND1, OPERAND2,EX_RESULT,MEM_RESULT,PC_to_EX,PC_Offset,MEM_Offset,DATA_to_MEM,MEM_to_WB;
+wire [2:0] DR_to_EX,DR_from_EX,DR_to_MEM,DR_to_WB;
+wire [1:0] ALUOP,OP_from_MEM,OP_from_EX,OP_to_MEM,WB_OP_in;
+wire[2:0] CC;
+wire WB_ENABLE;
 //WB wires
 wire [15:0] WB_val, wb_alu_src, wb_mem_src;
 
 
 //
-set(16,next_pc_in);
+
 //FETCH
-FE(CLOCK_50,reset,next_instr_addr,fe_instr_addr,id_instr_addr,next_pc_in,fetch_instr,id_instr,PC_WR_EN,FE_LATCH_WR,instr_mem_en,ctr_sig);
+FE fetch(CLOCK_50,reset,id_instr,id_instr_addr,BRANCH_from_EX,STALL,branch_addr);
 //Decode
-//ID(CLK,IR,OP_EX,OP_MEM,DR_EX,DR_MEM,STALL,DR,OPERAND1,OPERAND2,SR1,SR2,ALUOP,AGEX_RESULT,MEM_RESULT,DR_WB,WB_RESULT,WB_ENABLE,PC_Offset,Mem_Offset,CC);
+ID decode(CLOCK_50,id_instr,OP_from_EX,OP_to_MEM,DR_from_EX,DR_to_MEM,STALL,DR_to_EX,OPERAND1,OPERAND2,ALUOP,EX_RESULT,MEM_RESULT,DR_to_WB,WB_val,WB_ENABLE,PC_Offset,MEM_Offset,CC,BRANCH_to_EX,id_instr_addr,PC_to_EX,BRANCH_from_EX);
 //EXE stage
-
+EX execute(CLOCK_50,OPERAND1,OPERAND2,DR_to_EX,OP_from_EX,DR_from_EX,OP_to_MEM,DR_to_MEM,CC,ALUOP,EX_RESULT,PC_to_EX,PC_Offset,MEM_Offset,BRANCH_to_EX,BRANCH_from_EX,DATA_to_MEM,branch_addr);
 //MEM stage
-//MEM(CLOCK_50,reset, MEMINST, RW,ADDR, DATAIN, MEMDATAOUT, LATCHALUMEMSIG,LATCHDATAOUT, LATCHDATAIN, LATCHALUIN, LATCHALUOUT);
+MEM memory(CLOCK_50,reset, OP_to_MEM, EX_RESULT, DATA_to_MEM, MEM_RESULT, MEM_to_WB, OP_from_MEM,WB_OP_in,DR_to_MEM,DR_to_WB);
 //WB  stage
-WB(CLOCK_50, wb_ctr_sig, wb_mem_src, wb_alu_src, WB_val); 
+WB writeback(WB_OP_in, DR_to_WB, MEM_RESULT, WB_val, WB_ENABLE, HEX0,HEX1,HEX2,HEX3); 
 
-endmodule
 
-module set(IN,OUT);
-input [15:0] IN;
-output reg [15:0] OUT;
-always@(*) begin
-OUT <= IN;
-end
 endmodule
