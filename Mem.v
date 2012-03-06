@@ -1,15 +1,15 @@
-module MEM(CLOCK_50, RESET, MEMINST, RW,ADDR, DATAIN, MEMDATAOUT, LATCHALUMEMSIG,LATCHDATAOUT, LATCHDATAIN, LATCHALUIN, LATCHALUOUT);
+module mem(CLOCK_50, RESET, MEMINST, RW,ADDR, DATAIN, MEMDATAOUT, LATCHALUMEMSIG,LATCHDATAOUT, LATCHDATAIN, LATCHALUIN, LATCHALUOUT);
 //for r/w = 0 it is read, for r/w = 1 it is write
 input CLOCK_50, MEMINST,RW, RESET;
-input [15:0] DATAIN ,ADDR;
+input [15:0] DATAIN ,ADDR, LATCHDATAIN, LATCHALUIN;
 output reg [15:0] MEMDATAOUT;
-output [15:0] NONMEMDATAOUT;
+output [15:0] LATCHDATAOUT, LATCHALUOUT;
 output LATCHALUMEMSIG;
 reg [7:0] mem[0:65535];
 assign NONMEMDATAOUT = DATAIN;
 mem_latch(CLOCK_50,RESET, MEMDATAOUT, DATAIN, LATCHDATAOUT,LATCHALUOUT,MEMINST,LATCHALUMEMSIG);
 always @(posedge CLOCK_50) begin
-	if(MIOEN)
+	if(MEMINST)
 		if(RW)
 			//if it is write
 			mem[ADDR] <= DATAIN;
@@ -19,21 +19,22 @@ always @(posedge CLOCK_50) begin
 	
 endmodule
 
-module mem_latch(CLOCK_50, RESET, DATAIN, ALUIN, DATAOUT, ALUOUT,ALUMEMSIGIN, ALUMEMSIGOUT);//more control signals may have to be forwarded
+module mem_latch(CLOCK_50, RESET, DATAIN, ALUDATAIN, DATAOUT, ALUDATAOUT,ALUMEMSIGIN, ALUMEMSIGOUT);//more control signals may have to be forwarded
 input ALUMEMSIGIN, CLOCK_50, RESET;
 input [15:0] ALUDATAIN, DATAIN;
-output [15:0] ALUDATAOUT, DATAOUT;
+output reg [15:0] ALUDATAOUT, DATAOUT;
+output reg ALUMEMSIGOUT;
 always @ (CLOCK_50)
-	if(reset)
+	if(RESET)
 	begin
-		DATAOUT = 'd0;
-		ALUMEMSIGOUT = 'd0;
-		ALUOUT = 'd0;
+		DATAOUT <= 'd0;
+		ALUMEMSIGOUT <= 'd0;
+		ALUDATAOUT <= 'd0;
 	end
 	else
 	begin
 		DATAOUT<=DATAIN;
 		ALUMEMSIGOUT <= ALUMEMSIGIN;
-		ALUOUT <= ALUIN;
+		ALUDATAOUT <= ALUDATAIN;
 	end
 endmodule 
