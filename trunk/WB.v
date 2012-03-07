@@ -8,7 +8,7 @@ output [2:0] DR_out;
 output [6:0] HEX0, HEX1, HEX2, HEX3;
 
 assign WB_val = wb_data;
-assign WB_EN = (OP[0]) ? 1'b1 : 1'b0;
+assign WB_EN = (OP == 2'b01 || OP == 2'b10) ? 1'b1 : 1'b0;
 assign DR_out = DR;
 
 SevenSeg sseg0(.IN(WB_val[ 3: 0]),.OUT(HEX0));
