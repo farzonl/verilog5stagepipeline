@@ -25,7 +25,7 @@ wire[15:0] OPERAND1_wire,OPERAND2_wire,PC_Offset_wire,MEM_Offset_wire;
 wire[2:0] SR2_decoded = (IR_operation == 4'b0111) ? IR[11:9] : IR[2:0];
 wire BRANCH_wire;
 
-regfile registerfile(.CLK(CLK),.DR_NUM(DR_WB),.DR_VAL(WB_RESULT),.SRC1_NUM(SR1_decoded),.SRC1_VAL(SR1_val),.SRC2_NUM(SR2_decoded),.SRC2_VAL(SR2_val_from_regfile),.WENABLE(WB_ENABLE));
+regfile registerfile(.CLK(CLK),.DR_NUM(DR_WB),.DR_VAL(WB_RESULT),.SRC1_NUM(SR1_decoded),.SRC1_VAL(SR1_val),.SRC2_NUM(SR2_decoded),.SRC2_VAL(SR2_val_from_regfile),.WENABLE(WB_ENABLE),.RESET(RESET));
 
 sign_extend #(.INBITS(5),.OUTBITS(16)) Imm_sext(.IN(IR[4:0]),.OUT(SR2_imm));
 sign_extend #(.INBITS(9),.OUTBITS(16)) PC_sext(.IN(IR[8:0]),.OUT(PC_Offset_wire));
@@ -41,8 +41,8 @@ assign OPERAND1_wire =
 	SR1_val;
 
 assign OPERAND2_wire = 
-	(OP_EX==2'b01 && DR_EX==SR2_decoded) ? AGEX_RESULT:
-	((OP_MEM==2'b01 || OP_MEM==2'b10) && DR_MEM==SR2_decoded)? MEM_RESULT:
+	(OP_EX==2'b01 && DR_EX==SR2_decoded && IR[5] == 0) ? AGEX_RESULT:
+	((OP_MEM==2'b01 || OP_MEM==2'b10) && DR_MEM==SR2_decoded && IR[5] == 0)? MEM_RESULT:
 	SR2_val;
 
 assign ALU_operation =
@@ -102,10 +102,10 @@ module sign_extend(IN,OUT);
 	assign OUT = { {(OUTBITS-INBITS){IN[INBITS-1]}},IN};
 endmodule
 
-module regfile(DR_NUM,DR_VAL,SRC1_NUM,SRC1_VAL,SRC2_NUM,SRC2_VAL,CLK,WENABLE);
+module regfile(DR_NUM,DR_VAL,SRC1_NUM,SRC1_VAL,SRC2_NUM,SRC2_VAL,CLK,WENABLE,RESET);
 	input[2:0] DR_NUM,SRC1_NUM,SRC2_NUM;
 	input[15:0] DR_VAL;
-	input CLK,WENABLE;
+	input CLK,WENABLE,RESET;
 	output[15:0] SRC1_VAL,SRC2_VAL;
 	reg[15:0] register_file[7:0];
 	
@@ -123,7 +123,17 @@ module regfile(DR_NUM,DR_VAL,SRC1_NUM,SRC1_VAL,SRC2_NUM,SRC2_VAL,CLK,WENABLE);
 		register_file[7] = 0;
 	end
 	
-	always @(negedge CLK) begin
-		if(WENABLE) register_file[DR_NUM] <= DR_VAL;
+	always @(negedge CLK or posedge RESET) begin
+	if(RESET) begin
+		register_file[0] = 0;
+		register_file[1] = 0;
+		register_file[2] = 0;
+		register_file[3] = 0;
+		register_file[4] = 0;
+		register_file[5] = 0;
+		register_file[6] = 0;
+		register_file[7] = 0;
+	end
+	else if(WENABLE) register_file[DR_NUM] <= DR_VAL;
 	end
 endmodule

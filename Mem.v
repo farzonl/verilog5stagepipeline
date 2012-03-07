@@ -10,11 +10,17 @@ wire [15:0] LATCHDATAIN;
 
 output [15:0] LATCHDATAOUT,MEM_RESULT;
 
-reg [15:0] mem[0:128];
+reg [15:0] mem[0:127];
+integer i;
 
 mem_latch memlatch(CLOCK_50,RESET, LATCHDATAIN, LATCHDATAOUT,OP_IN,LATCHOPOUT,DESTREG_IN,DESTREG_OUT);
-always @(posedge CLOCK_50) begin
-	if(OP_IN[1] && OP_IN[0]) begin
+always @(posedge CLOCK_50 or posedge RESET) begin
+	if(RESET) begin
+		for(i = 0; i < 128; i = i+ 1) begin
+			mem[i] <= 0;
+		end
+	end
+	else if(OP_IN[1] && OP_IN[0]) begin
 			//if it is write
 			mem[ADDR] <= DATAIN;
 	end
