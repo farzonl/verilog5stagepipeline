@@ -1,6 +1,6 @@
-module ID(CLK,IR,OP_EX,OP_MEM,DR_EX,DR_MEM,STALL,DR,OPERAND1,OPERAND2,ALUOP,AGEX_RESULT,MEM_RESULT,DR_WB,WB_RESULT,WB_ENABLE,PC_Offset,Mem_Offset,CC,BRANCH,PC_IN,PC_OUT,BRANCH_IN);
+module ID(CLK,RESET,IR,OP_EX,OP_MEM,DR_EX,DR_MEM,STALL,DR,OPERAND1,OPERAND2,ALUOP,AGEX_RESULT,MEM_RESULT,DR_WB,WB_RESULT,WB_ENABLE,PC_Offset,Mem_Offset,CC,BRANCH,PC_IN,PC_OUT,BRANCH_IN);
 
-input CLK,WB_ENABLE;
+input CLK,WB_ENABLE,RESET;
 input BRANCH_IN;
 input[15:0] IR,AGEX_RESULT,MEM_RESULT,WB_RESULT,PC_IN;
 input[1:0] OP_EX,OP_MEM;
@@ -37,12 +37,12 @@ assign OPERAND1_wire =
 	//If we have an add operation
 	(OP_EX==2'b01 && DR_EX==SR1_decoded) ? AGEX_RESULT:
 	//Only check MEM if EX doesn't have one of our source registers
-	(OP_MEM==2'b10 && DR_MEM==SR1_decoded) ? MEM_RESULT:
+	((OP_MEM==2'b01 || OP_MEM==2'b10) && DR_MEM==SR1_decoded) ? MEM_RESULT:
 	SR1_val;
 
 assign OPERAND2_wire = 
 	(OP_EX==2'b01 && DR_EX==SR2_decoded) ? AGEX_RESULT:
-	(OP_MEM==2'b10 && DR_MEM==SR2_decoded)? MEM_RESULT:
+	((OP_MEM==2'b01 || OP_MEM==2'b10) && DR_MEM==SR2_decoded)? MEM_RESULT:
 	SR2_val;
 
 assign ALU_operation =
@@ -51,9 +51,28 @@ assign ALU_operation =
 	(IR_operation == 4'b0110) ? 2'b10: //LDW
 	(IR_operation == 4'b0111) ? 2'b11: //STW
 	2'bxx;
-
-always @(posedge CLK) begin
-if(!BRANCH_IN) begin
+initial begin
+	OPERAND1 <= 0;
+	OPERAND2 <= 0;
+	PC_OUT <= 0;
+	ALUOP <= 0;
+	DR <= 0;
+	BRANCH <= 0;
+	PC_Offset <= 0;
+	Mem_Offset <= 0;
+end
+always @(posedge CLK or posedge RESET) begin
+if(RESET) begin
+	OPERAND1 <= 0;
+	OPERAND2 <= 0;
+	PC_OUT <= 0;
+	ALUOP <= 0;
+	DR <= 0;
+	BRANCH <= 0;
+	PC_Offset <= 0;
+	Mem_Offset <= 0;
+end
+else if(!BRANCH_IN) begin
 	OPERAND1 <= OPERAND1_wire;
 	OPERAND2 <= OPERAND2_wire;
 	PC_OUT <= PC_IN;
@@ -104,7 +123,7 @@ module regfile(DR_NUM,DR_VAL,SRC1_NUM,SRC1_VAL,SRC2_NUM,SRC2_VAL,CLK,WENABLE);
 		register_file[7] = 0;
 	end
 	
-	always @(posedge CLK) begin
+	always @(negedge CLK) begin
 		if(WENABLE) register_file[DR_NUM] <= DR_VAL;
 	end
 endmodule

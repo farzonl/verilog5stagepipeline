@@ -1,12 +1,12 @@
-module EX(CLK,OPERAND1,OPERAND2,DR,OP_EX_RETURN,DR_EX_RETURN,OP_to_MEM,DR_to_MEM,CC,ALUOP,RESULT,PC,PC_OFFSET,MEM_OFFSET,BRANCH_IN,BRANCH_OUT,MEMDATA,BRANCH_ADDR);
+module EX(CLK,RESET,OPERAND1,OPERAND2,DR,OP_EX_RETURN,DR_EX_RETURN,OP_to_MEM,DR_to_MEM,CC,ALUOP,RESULT,PC,PC_OFFSET,MEM_OFFSET,BRANCH_IN,BRANCH_OUT,MEMDATA,BRANCH_ADDR,EX_result_forward);
 	input[15:0] OPERAND1,OPERAND2,PC,PC_OFFSET,MEM_OFFSET;
 	input[2:0] DR;
 	input[1:0] ALUOP;
-	input CLK,BRANCH_IN;
+	input CLK,BRANCH_IN,RESET;
 	
 	output[1:0] OP_EX_RETURN;
 	output[2:0] DR_EX_RETURN;
-	output[15:0] BRANCH_ADDR;
+	output[15:0] BRANCH_ADDR,EX_result_forward;
 	output reg[1:0] OP_to_MEM;
 	output reg[2:0] DR_to_MEM;
 	output reg[15:0] RESULT,MEMDATA;
@@ -27,10 +27,25 @@ module EX(CLK,OPERAND1,OPERAND2,DR,OP_EX_RETURN,DR_EX_RETURN,OP_to_MEM,DR_to_MEM
 	assign DR_EX_RETURN = DR;
 	assign BRANCH_OUT = BRANCH_IN;
 	assign BRANCH_ADDR = ALU_result;
-	always @(posedge CLK) begin
+	assign EX_result_forward = ALU_result;
+	initial begin
+		RESULT <= 0;
+		OP_to_MEM <= 0;
+		DR_to_MEM <= 0;
+		MEMDATA <= 0;
+	end
+	always @(posedge CLK or posedge RESET) begin
+		if(RESET) begin
+		RESULT <= 0;
+		OP_to_MEM <= 0;
+		DR_to_MEM <= 0;
+		MEMDATA <= 0;
+		end
+		else begin
 		RESULT <= RESULT_wire;
 		OP_to_MEM <= ALUOP;
 		DR_to_MEM <= DR;
 		MEMDATA <= MEMDATA_wire;
+		end
 	end
 endmodule

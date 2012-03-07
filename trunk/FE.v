@@ -14,7 +14,7 @@ pc_adder_2 adder2(fe_instr_addr,next_pc_in);
 Instr_Mem instrmem(CLOCK_50,reset,fe_instr_addr,fetch_instr);
 
 Instr_FE_Latch pipelineregs(CLOCK_50,reset,WR_EN,fetch_instr,next_pc_in, id_instr, id_instr_addr);*/
-(* ram_init_file = "test1.mif" *)
+(* ram_init_file = "test2.mif" *)
 reg[15:0] mem[0:127];
 reg[15:0] mdr;
 reg[15:0] pc;

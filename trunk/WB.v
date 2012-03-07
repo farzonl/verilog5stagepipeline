@@ -1,13 +1,15 @@
-module WB(OP, DR, wb_data, WB_val, WB_EN, HEX0,HEX1,HEX2,HEX3);
+module WB(OP, DR, wb_data, WB_val, WB_EN, DR_out, HEX0,HEX1,HEX2,HEX3);
 input [1:0] OP;
 input [2:0] DR;
 input [15:0] wb_data;
 output [15:0] WB_val;
 output WB_EN;
+output [2:0] DR_out;
 output [6:0] HEX0, HEX1, HEX2, HEX3;
 
 assign WB_val = wb_data;
 assign WB_EN = (OP[0]) ? 1'b1 : 1'b0;
+assign DR_out = DR;
 
 SevenSeg sseg0(.IN(WB_val[ 3: 0]),.OUT(HEX0));
 SevenSeg sseg1(.IN(WB_val[ 7: 4]),.OUT(HEX1));
