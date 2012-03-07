@@ -23,7 +23,12 @@ initial begin
 end
 
 always @(posedge CLOCK_50 or posedge reset) begin
-	if(reset) pc <= 8;
+	if(reset) begin
+		pc <= 8;
+		mdr <= 0;
+		id_instr <= 0;
+		id_instr_addr <= 0;
+	end
 	else if(WR_EN) begin
 		if(BRANCH) pc <= branch_instr_addr;
 		else pc <= pc + 1;
