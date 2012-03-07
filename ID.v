@@ -66,7 +66,7 @@ end
 end
 
 //CC[2] = N, CC[1] == Z, CC[0] == P
-assign STALL = (ALU_operation == 2'b00) ? 1'b1: 1'b0;//((ALU_operation == 2'b00 && ((IR[11] && CC[2]) || (IR[10] && CC[1]) || (IR[9] && CC[0]))) || (OP_EX==2'b10 && (DR_EX == SR1_decoded || DR_EX == SR2_decoded))) ? 1'b1 : 1'b0;
+assign STALL = (ALU_operation == 2'b00 && IR!=16'd0) ? 1'b1: 1'b0;//((ALU_operation == 2'b00 && ((IR[11] && CC[2]) || (IR[10] && CC[1]) || (IR[9] && CC[0]))) || (OP_EX==2'b10 && (DR_EX == SR1_decoded || DR_EX == SR2_decoded))) ? 1'b1 : 1'b0;
 assign BRANCH_wire = (ALU_operation == 2'b00 && ((IR[11] && CC[2]) || (IR[10] && CC[1]) || (IR[9] && CC[0]))) ? 1'b1 : 1'b0;
 //assign DR = IR[11:9];
 //assign SR1 = SR1_decoded;
@@ -92,6 +92,17 @@ module regfile(DR_NUM,DR_VAL,SRC1_NUM,SRC1_VAL,SRC2_NUM,SRC2_VAL,CLK,WENABLE);
 	
 	assign SRC1_VAL = register_file[SRC1_NUM];
 	assign SRC2_VAL = register_file[SRC2_NUM];
+	
+	initial begin
+		register_file[0] = 0;
+		register_file[1] = 0;
+		register_file[2] = 0;
+		register_file[3] = 0;
+		register_file[4] = 0;
+		register_file[5] = 0;
+		register_file[6] = 0;
+		register_file[7] = 0;
+	end
 	
 	always @(posedge CLK) begin
 		if(WENABLE) register_file[DR_NUM] <= DR_VAL;
