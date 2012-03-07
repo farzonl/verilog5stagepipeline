@@ -10,7 +10,7 @@ wire [15:0] LATCHDATAIN;
 
 output [15:0] LATCHDATAOUT,MEM_RESULT;
 
-reg [15:0] mem[0:65535];
+reg [15:0] mem[0:128];
 
 mem_latch memlatch(CLOCK_50,RESET, LATCHDATAIN, LATCHDATAOUT,OP_IN,LATCHOPOUT,DESTREG_IN,DESTREG_OUT);
 always @(posedge CLOCK_50) begin
@@ -33,10 +33,17 @@ input [1:0] OP;
 output reg [15:0] DATAOUT;
 output reg[2:0] DESTREG_OUT;
 output reg[1:0] LATCHOPOUT;
+initial begin
+	DATAOUT <= 'd0;
+	LATCHOPOUT <= 0;
+	DESTREG_OUT <= 0;
+end
 always @ (posedge CLOCK_50 or posedge RESET)
 	if(RESET)
 	begin
 		DATAOUT <= 'd0;
+		LATCHOPOUT <= 0;
+		DESTREG_OUT <= 0;
 	end
 	else
 	begin
