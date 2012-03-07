@@ -1,6 +1,7 @@
 module processor (CLOCK_50, KEY, HEX0,HEX1,HEX2,HEX3,DR_out,WB_val_out,BRANCH_out,STALL_out,OP_out,IR_out,WB_Enable_out,DR_to_EX_out,DR_from_EX_out,DR_to_MEM_out,DR_to_WB_out,DR_to_ID_out,EX_RESULT_fwd_out,MEM_RESULT_fwd_out);
 input CLOCK_50;
-input [0:0] KEY;
+input [1:0] KEY;
+//wire CLOCK_50 = !KEY[1];
 output [6:0] HEX0,HEX1,HEX2,HEX3;
 output [2:0] DR_out;
 output [15:0] WB_val_out;
@@ -10,7 +11,6 @@ output [15:0] IR_out;
 output WB_Enable_out;
 output [2:0] DR_to_EX_out,DR_from_EX_out,DR_to_MEM_out,DR_to_WB_out,DR_to_ID_out;
 output [15:0] EX_RESULT_fwd_out,MEM_RESULT_fwd_out;
-
 wire [15:0] next_instr_addr, fe_instr_addr, id_instr_addr,branch_addr;
 wire [15:0] fetch_instr  , id_instr;
 wire PC_WR_EN, FE_LATCH_WR, instr_mem_en;
