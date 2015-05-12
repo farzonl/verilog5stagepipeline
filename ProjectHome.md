@@ -1,0 +1,1 @@
+a 5 stage pipeline 4 instructions
